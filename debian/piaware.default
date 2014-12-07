@@ -1,0 +1,14 @@
+# Defaults for piaware
+# This is a POSIX shell fragment
+
+# Set to "yes" to start piaware on boot.
+START_PIAWARE="no"
+
+# User to run piaware as.
+PIAWARE_USER=piaware
+
+# Logfile to log to
+#LOGFILE=/var/log/piaware.log
+
+# Additional options that are passed to the Daemon.
+#EXTRA_ARGS=""

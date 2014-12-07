@@ -1,0 +1,5 @@
+/var/log/piaware.log {
+  weekly
+  rotate 4
+  copytruncate
+}
