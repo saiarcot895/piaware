@@ -1,0 +1,5 @@
+package/*.tcl usr/lib/fa_adept_packages
+package/ca/*.crt usr/lib/fa_adept_packages
+programs/piaware/*.tcl usr/lib/piaware
+programs/piaware-config/*.tcl usr/lib/piaware-config
+programs/piaware-status/*.tcl usr/lib/piaware-status

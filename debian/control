@@ -1,0 +1,20 @@
+Source: piaware
+Section: embedded
+Priority: extra
+Maintainer: Oliver Jowett <oliver@mutability.co.uk>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: https://github.com/flightaware/piaware
+Vcs-Git: https://github.com/mutability/piaware -b debian-package
+
+Package: piaware
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tcllauncher, net-tools, tcllib, tcl-tls, itcl3
+Description:Open Aviation Data Exchange Protocol for ADS-B FlightFeeders
+ The client-side portion of fa_adept that sends aviation data via TCL sockets.
+ .
+ This is an unofficial repackaging of the FlightAware package, with a
+ focus on better security, better integration with existing systems
+ that are not dedicated FlightAware-only receivers, and being more
+ consistent with how the rest of a normal Debian/Raspbian system
+ works.
