@@ -217,7 +217,7 @@ proc inspect_sockets_with_netstat {} {
     set ::netstatus(piaware_10001) 0
     set ::netstatus(piaware_1200) 0
 
-    set fp [open "|netstat --program --protocol=inet --tcp --wide --all"]
+    set fp [open "|netstat --program --protocol=inet --tcp --wide --all 2>/dev/null"]
     # discard two header lines
     gets $fp
     gets $fp
