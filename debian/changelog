@@ -1,3 +1,9 @@
+piaware (1.18-2+2mu-2) UNRELEASED; urgency=medium
+
+  * Remove redundant override_dh_install in debian/rules
+
+ -- Oliver Jowett <oliver@mutability.co.uk>  Sun, 07 Dec 2014 22:13:35 +0000
+
 piaware (1.18-2+2mu-1) unstable; urgency=low
 
   * Unofficial repackaging of piaware to Be A Better Package.
