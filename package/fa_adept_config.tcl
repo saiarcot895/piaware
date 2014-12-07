@@ -54,7 +54,7 @@ proc set_adept_config {var value} {
 #  global array to the adept config file.
 #
 proc save_adept_config {} {
-	set fp [open $::adeptConfigFile w 0600]
+	set fp [open $::adeptConfigFile w 0640]
 	foreach var [lsort [array names ::adeptConfig]] {
 		puts $fp [list $var $::adeptConfig($var)]
 	}
