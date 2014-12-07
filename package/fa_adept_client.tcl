@@ -401,6 +401,10 @@ namespace eval ::fa_adept {
 	#   or by piaware-config configured true, the update cannot occur.
 	#
 	method update_check {varName} {
+	        # This repackaging does not support remote update requests.
+		logger "All $varName requests denied - unsupported by this package."
+	        return 0
+
 		# if there is no matching update variable in the adept config or
 		# a global variable set by /etc/piaware, bail
 		if {![info exists ::adeptConfig($varName)] && ![info exists ::$varName]} {
