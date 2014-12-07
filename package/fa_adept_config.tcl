@@ -5,7 +5,7 @@
 #
 #
 
-set adeptConfigFile "/root/.piaware"
+set adeptConfigFile "/etc/piaware.adept.conf"
 
 #
 # load_adept_config - open and read in the adept config file.

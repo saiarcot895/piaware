@@ -20,7 +20,15 @@ set -e
 
 case "$1" in
     configure)
-        adduser --system --home /usr/lib/piaware --no-create-home --quiet piaware
+        adduser --system --group piaware --home /usr/lib/piaware --no-create-home --quiet piaware
+	if [ ! -f /etc/piaware.adept.conf ]; then
+	  # piaware.adept.conf will hold passwords etc;
+	  # make it writable by root and readable by the piaware group,
+	  # but otherwise unreadable.
+          touch /etc/piaware.adept.conf
+	  chown root:piaware /etc/piaware.adept.conf
+	  chmod 0640 /etc/piaware.adept.conf
+        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
