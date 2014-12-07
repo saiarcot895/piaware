@@ -36,8 +36,8 @@ proc greetings {} {
 # user_check - require us to be run as a specific user
 #
 proc user_check {} {
-	if {[id user] != "root"} {
-		puts stderr "$::argv0 must be run as user 'root'"
+	if {[id user] == "root"} {
+		puts stderr "$::argv0 should not be run as 'root'"
 		exit 4
 	}
 }
