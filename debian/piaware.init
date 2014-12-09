@@ -19,7 +19,6 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="piaware daemon"
 NAME=piaware
 DAEMON=/usr/bin/$NAME
-ARGS="--quiet"
 PIDFILE=/var/run/piaware/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 

@@ -2,6 +2,7 @@ piaware (1.18-2+2mu-2) UNRELEASED; urgency=medium
 
   * Remove redundant override_dh_install in debian/rules
   * Prefer to report the Debian package version when available
+  * Remove a redundant ARGS setting in debian/piaware.init
 
  -- Oliver Jowett <oliver@mutability.co.uk>  Sun, 07 Dec 2014 22:13:35 +0000
 
