@@ -1,4 +1,4 @@
-Source: piaware
+Source: piaware-mutability
 Section: embedded
 Priority: extra
 Maintainer: Oliver Jowett <oliver@mutability.co.uk>
@@ -7,10 +7,11 @@ Standards-Version: 3.9.4
 Homepage: https://github.com/flightaware/piaware
 Vcs-Git: https://github.com/mutability/piaware -b debian-package
 
-Package: piaware
+Package: piaware-mutability
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tcllauncher, net-tools, tcllib, tcl-tls, itcl3, faup1090
-Suggests: dump1090-mr | dump1090-mutability | dump1090-flightaware
+Depends: ${shlibs:Depends}, ${misc:Depends}, tcllauncher, net-tools, tcllib, tcl-tls, itcl3, faup1090, adduser
+Suggests: dump1090-mutability | dump1090-flightaware | dump1090-mr
+Conflicts: piaware
 Description: Open Aviation Data Exchange Protocol for ADS-B FlightFeeders
  The client-side portion of fa_adept that sends aviation data via TCL sockets.
  .
