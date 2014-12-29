@@ -1,4 +1,4 @@
-piaware-mutability (1.18-2+2mu-2) UNRELEASED; urgency=medium
+piaware-mutability (1.18-2+2mu-2) unstable; urgency=medium
 
   * Remove redundant override_dh_install in debian/rules
   * Prefer to report the Debian package version when available
@@ -18,7 +18,7 @@ piaware-mutability (1.18-2+2mu-2) UNRELEASED; urgency=medium
     dump1090-mutability, dump1090-flightaware, and faup1090.
   * Strip down the Suggests: dependencies.
 
- -- Oliver Jowett <oliver@mutability.co.uk>  Sun, 07 Dec 2014 22:13:35 +0000
+ -- Oliver Jowett <oliver@mutability.co.uk>  Mon, 29 Dec 2014 23:45:43 +0000
 
 piaware (1.18-2+2mu-1) unstable; urgency=low
 
