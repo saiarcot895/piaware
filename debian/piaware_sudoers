@@ -1,3 +1,6 @@
+# To edit this file safely, please use visudo:
+#  $ sudo visudo -f /etc/sudoers.d/piaware_sudoers
+
 # This is a sample sudoers file to allow piaware to run commands with
 # root privileges. The commands are typically run from a hook script
 # contained in /etc/piaware.hooks/
