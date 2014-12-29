@@ -9,6 +9,12 @@ piaware-mutability (1.18-2+2mu-2) UNRELEASED; urgency=medium
   * Add a config option to disable sending system health information.
   * Add Build-Depends: tcl8.5 to allow the package index to be regenerated.
   * Delete the generated package index during package clean.
+  * Reenable updates using a hook-script system to actually execute tasks.
+  * Provide an example (commented) sudoers file that allows the provided
+    hook scripts to execute some things as root.
+  * Add Recommends: sudo.
+  * Move the dependency on faup1090 into Recommends:, as piaware will function
+    without it (e.g. if dump1090-mutability or dump1090-flightaware is used)
 
  -- Oliver Jowett <oliver@mutability.co.uk>  Sun, 07 Dec 2014 22:13:35 +0000
 

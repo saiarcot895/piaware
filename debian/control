@@ -9,7 +9,8 @@ Vcs-Git: https://github.com/mutability/piaware -b debian-package
 
 Package: piaware-mutability
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tcllauncher, net-tools, tcllib, tcl-tls, itcl3, faup1090, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, tcllauncher, net-tools, tcllib, tcl-tls, itcl3, adduser
+Recommends: sudo, faup1090
 Suggests: dump1090-mutability | dump1090-flightaware | dump1090-mr
 Conflicts: piaware
 Description: Open Aviation Data Exchange Protocol for ADS-B FlightFeeders
