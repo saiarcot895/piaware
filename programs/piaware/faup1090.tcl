@@ -400,8 +400,8 @@ proc stop_faup1090_close_faup1090_socket_and_reopen {} {
 # attempt_dump1090_restart - restart dump1090 if we can figure out how to
 #
 proc attempt_dump1090_restart {{action restart}} {
-    logger "attempting to $action dump1090 using '$script $action'..."
-    run_hook_script "$action_dump1090"
+    logger "attempting to $action dump1090..."
+    run_hook_script "${action}_dump1090"
 }
 
 #
