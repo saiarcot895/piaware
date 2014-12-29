@@ -200,4 +200,21 @@ proc cleanup_and_exit {} {
 	exit 0
 }
 
+#
+# may_send_health_messages: return true if we are permitted to send system
+# information in health messages
+#
+proc may_send_health_messages {} {
+    if {![info exists ::adeptConfig(sendHealthInfo)]} {
+        return 1
+    }
+
+    if {![string is boolean $::adeptConfig(sendHealthInfo)]} {
+        return 0
+    }
+
+    return $::adeptConfig(sendHealthInfo)
+}
+
+
 # vim: set ts=4 sw=4 sts=4 noet :

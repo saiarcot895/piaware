@@ -113,7 +113,12 @@ if 0 {
 
 	periodically_check_adsb_traffic
 
-	after 30000 periodically_send_health_information
+        if {[may_send_health_messages]} {
+            log_locally "piaware will send periodic system health information."
+            after 30000 periodically_send_health_information
+        } else {
+            log_locally "piaware will NOT send periodic system health information (disabled in config file)"
+        }
 
     catch {vwait die}
 
