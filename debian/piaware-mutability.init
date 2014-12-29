@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          piaware
+# Provides:          piaware-mutability
 # Required-Start:    $remote_fs
 # Required-Stop:     $remote_fs
 # Should-Start:      dump1090-mutability dump1090-mr dump1090-flightaware
@@ -16,9 +16,9 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-NAME=piaware
+NAME=piaware-mutability
 DESC="$NAME daemon"
-DAEMON=/usr/bin/$NAME
+DAEMON=/usr/bin/piaware
 PIDFILE=/var/run/$NAME/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
