@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Executed by piaware to try to restart itself.
+# This hook will be backgrounded.
 
-set -e
-echo "$0: trying to restart piaware" >&2
-/etc/init.d/piaware-mutability restart
+exec /etc/init.d/piaware-mutability restart

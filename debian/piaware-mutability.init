@@ -66,6 +66,11 @@ do_start()
           (mkdir $PIDFILEDIR && chmod 0700 $PIDFILEDIR && chown $PIAWARE_USER $PIDFILEDIR) || log_warning_msg "Failed to create $PIDFILEDIR"
         fi
 
+        # make sure that the logfile is owned by piaware (this is so that a self-restart
+        # as the piaware user can re-open the logfile)
+        if [ ! -f $LOGFILE ]; then touch $LOGFILE; fi
+        chown $PIAWARE_USER $LOGFILE
+        
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --user $PIAWARE_USER --chuid $PIAWARE_USER --background --no-close --exec $DAEMON -- \
 		-p $PIDFILE -debug $EXTRA_ARGS >>$LOGFILE 2>&1 \
 		|| return 2

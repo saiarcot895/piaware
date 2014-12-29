@@ -446,7 +446,7 @@ proc run_hook_script {type} {
 
     unset -nocomplain ::externalProgramFinished
 
-    if {[catch {set fp [open "|$::piawareHookDir/$type"]} catchResult] == 1} {
+    if {[catch {set fp [open "|$::piawareHookDir/$type 2>@1"]} catchResult] == 1} {
 		logger "*** error attempting to start command: $catchResult"
 		return 0
     }
@@ -454,7 +454,7 @@ proc run_hook_script {type} {
     fileevent $fp readable [list external_program_data_available $fp]
 
     vwait ::externalProgramFinished
-    return 1
+    return $::externalProgramSuccess
 }
 
 #
@@ -462,7 +462,7 @@ proc run_hook_script {type} {
 #
 proc exec_hook_script_in_background {type} {
     logger "*** starting hook script '$::piawareHookDir/$type' in the background"
-    return [exec $::piawareHookDir/$type &]
+    return [exec -ignorestderr $::piawareHookDir/$type &]
 }
 
 #
@@ -473,7 +473,10 @@ proc external_program_data_available {fp} {
     if {[eof $fp]} {
 		if {[catch {close $fp} catchResult] == 1} {
 			logger "*** error closing pipeline to command: $catchResult, continuing..."
-		}
+                        set ::externalProgramSuccess 0
+		} else {
+                        set ::externalProgramSuccess 1
+                }
 		set ::externalProgramFinished 1
 		return
     }
@@ -579,7 +582,7 @@ proc upgrade_dump1090 {} {
 #
 proc restart_piaware {} {
     logger "restarting piaware. hopefully i'll be right back..."
-    run_hook_script("restart_piaware")
+    exec_hook_script_in_background "restart_piaware"
     sleep 10
     logger "piaware failed to die, pid [pid]"
 }
