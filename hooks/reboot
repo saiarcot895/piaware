@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Executed by piaware to try to reboot the machine.
+
+echo "$0: trying to reboot the machine" >&2
+
+if sudo -n -l /sbin/reboot >/dev/null; then
+  sudo -n /sbin/reboot
+else
+  echo "$0: no permission to attempt a reboot" >&2
+  exit 1
+fi

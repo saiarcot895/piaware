@@ -1,0 +1,39 @@
+# This is a sample sudoers file to allow piaware to run commands with
+# root privileges. The commands are typically run from a hook script
+# contained in /etc/piaware.hooks/
+
+# By default everything is disabled. To enable particular commands, uncomment
+# them. It's up to you what you allow piaware to do!
+
+# These rules assume that piaware runs as the user "piaware". If you have
+# changed the configuration to run as some other user, you will need to
+# update the username here too.
+
+# Run by /etc/piaware.hooks/halt: halts the machine
+#piaware ALL = NOPASSWD: /sbin/halt ""
+
+# Run by /etc/piaware.hooks/reboot: reboots the machine
+#piaware ALL = NOPASSWD: /sbin/reboot ""
+
+# Run by /etc/piaware.hooks/upgrade_* scripts: downloads updated package lists
+#piaware ALL = NOPASSWD: /usr/bin/apt-get -q --yes update
+
+# Run by /etc/piaware.hooks/upgrade_raspbian_packages: upgrades all packages
+#piaware ALL = NOPASSWD: /usr/bin/apt-get -q --yes upgrade
+
+# Run by /etc/piaware.hooks/upgrade_piaware: upgrades Piaware packages only
+#piaware ALL = NOPASSWD: /usr/bin/apt-get -q --yes --only-upgrade install piaware-mutability faup1090 tcllauncher
+
+# Run by /etc/piaware.hooks/upgrade_dump1090: upgrades dump1090 packages only
+#piaware ALL = NOPASSWD: /usr/bin/apt-get -q --yes --only-upgrade install dump1090-mr dump1090-mutability dump1090-flightaware
+
+# Run by /etc/piaware.hooks/start_dump1090: starts dump1090 (various versions) via init.d scripts
+#piaware ALL = NOPASSWD: /etc/init.d/dump1090-mutability start
+#piaware ALL = NOPASSWD: /etc/init.d/dump1090-flightaware start
+#piaware ALL = NOPASSWD: /etc/init.d/dump1090-mr start
+
+# Run by /etc/piaware.hooks/restart_dump1090: restarts dump1090 (various versions) via init.d scripts
+#piaware ALL = NOPASSWD: /etc/init.d/dump1090-mutability restart
+#piaware ALL = NOPASSWD: /etc/init.d/dump1090-flightaware restart
+#piaware ALL = NOPASSWD: /etc/init.d/dump1090-mr restart
+

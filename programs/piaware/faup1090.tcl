@@ -229,7 +229,7 @@ proc stop_faup1090 {} {
 # start_faup1090 - start faup1090, killing it if it is already running
 #
 proc start_faup1090 {} {
-	set ::faup1090Pid [exec /usr/bin/faup1090 &]
+	set ::faup1090Pid [exec_hook_script_in_background start_faup1090]
 	logger "started faup1090 (process ID $::faup1090Pid)"
 	sleep 3
 }
@@ -400,40 +400,8 @@ proc stop_faup1090_close_faup1090_socket_and_reopen {} {
 # attempt_dump1090_restart - restart dump1090 if we can figure out how to
 #
 proc attempt_dump1090_restart {{action restart}} {
-	set scripts [glob -nocomplain /etc/init.d/*dump1090*]
-
-	switch [llength $scripts] {
-		0 {
-			logger "can't $action dump1090, no dump1090 script in /etc/init.d"
-			return
-		}
-
-		1 {
-			set script [lindex $scripts 0]
-		}
-
-		default {
-			foreach script $scripts {
-				if {[string match "fadump1090*" $script]} {
-					set scripts $script
-					break
-				}
-			}
-			if {[llength $scripts] > 1} {
-				set scripts [lindex $scripts 0]
-			}
-			logger "warning, more than one dump1090 script in /etc/init.d, proceeding with '$script'..."
-		}
-	}
-
-	logger "attempting to $action dump1090 using '$script $action'..."
-	set exitStatus [system "$script $action"]
-
-	if {$exitStatus == 0} {
-		logger "dump1090 $action appears to have been successful"
-	} else {
-		logger "got exit status $exitStatus while trying to $action dump1090"
-	}
+    logger "attempting to $action dump1090 using '$script $action'..."
+    run_hook_script "$action_dump1090"
 }
 
 #

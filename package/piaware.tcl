@@ -10,6 +10,7 @@ package require Itcl
 
 set piawarePidFile /var/run/piaware.pid
 set piawareConfigFile /etc/piaware
+set piawareHookDir /etc/piaware.hooks
 
 #
 # load_piaware_config - load the piaware config file.  don't stop if it
@@ -394,15 +395,15 @@ proc warn_once {message args} {
 #
 proc reboot {} {
     logger "rebooting..."
-    system "/sbin/reboot"
+    run_hook_script "reboot"
 }
 
 #
 # halt - halt the machine
 #
 proc halt {} {
-	logger "halting..."
-	system "/sbin/halt"
+    logger "halting..."
+    run_hook_script "halt"
 }
 
 #
@@ -419,7 +420,6 @@ proc update_operating_system_and_packages {} {
     upgrade_raspbian_packages
     upgrade_dump1090
     upgrade_piaware
-	#upgrade_raspbian_kernel
     reboot
 }
 
@@ -429,40 +429,24 @@ proc update_operating_system_and_packages {} {
 proc upgrade_raspbian_packages {} {
     logger "*** attempting to upgrade raspbian packages to the latest"
 
-    if {![run_program_log_output "apt-get --yes update"]} {
+    if {![run_hook_script "upgrade_raspbian_packages"]} {
 		logger "aborting upgrade..."
 		return 0
     }
 
-    if {![run_program_log_output "apt-get --yes upgrade"]} {
-		logger "aborting upgrade..."
-		return 0
-    }
     return 1
 }
 
 #
-# upgrade_raspbian_kernel - upgrade the raspbian kernel by running rpi-update;
-# requires a reboot to take effect
+# run_hook_script - run a hook script from piawareHookDir with stderr redirected to stdout and
+#   log all the output of the script
 #
-proc upgrade_raspbian_kernel {} {
-    logger "*** attempting to upgrade raspbian kernel and boot files to the latest"
-    if {![run_program_log_output "rpi-update"]} {
-		logger "aborting upgrade..."
-		return 0
-    }
-}
-
-#
-# run_program_log_output - run command with stderr redirected to stdout and
-#   log all the output of the command
-#
-proc run_program_log_output {command} {
-    logger "*** running command '$command' and logging output"
+proc run_hook_script {type} {
+    logger "*** running hook script '$::piawareHookDir/$type' and logging output"
 
     unset -nocomplain ::externalProgramFinished
 
-    if {[catch {set fp [open "|$command"]} catchResult] == 1} {
+    if {[catch {set fp [open "|$::piawareHookDir/$type"]} catchResult] == 1} {
 		logger "*** error attempting to start command: $catchResult"
 		return 0
     }
@@ -471,6 +455,14 @@ proc run_program_log_output {command} {
 
     vwait ::externalProgramFinished
     return 1
+}
+
+#
+# exec_hook_script_in_background - exec a script from piawareHookDir, background it, and return its pid (like 'exec foo &')
+#
+proc exec_hook_script_in_background {type} {
+    logger "*** starting hook script '$::piawareHookDir/$type' in the background"
+    return [exec $::piawareHookDir/$type &]
 }
 
 #
@@ -566,19 +558,7 @@ proc fetch_url_as_binary_file {url outputFile} {
 # the current site
 #
 proc upgrade_piaware {} {
-    set debianPackageFile [fetch_url_as_string "https://flightaware.com/adsb/piaware/files/latest"]
-    if {$debianPackageFile == ""} {
-		logger "unable to upgrade piaware: failed to get name of package file"
-		return 0
-    }
-
-    if {[string first / $debianPackageFile] >= 0} {
-		logger "unable to upgrade piaware: illegal character in version '$debianPackageFile'"
-		return 0
-    }
-
-    set requestUrl https://flightaware.com/adsb/piaware/files/$debianPackageFile
-	return [upgrade_dpkg_package piaware $requestUrl]
+    return [run_hook_script "upgrade_piaware"]
 }
 
 #
@@ -590,69 +570,7 @@ proc upgrade_piaware {} {
 # the current site
 #
 proc upgrade_dump1090 {} {
-	logger "upgrade of dump1090 requested"
-
-	if {[glob -nocomplain /etc/init.d/fadump1090.sh] == ""} {
-		logger "you don't appear to have FlightAware's (no /etc/init.d/fadump1090.sh), i'm not going to mess with it"
-		return 0
-	}
-
-    set debianPackageFile [fetch_url_as_string "https://flightaware.com/adsb/piaware/files/latest_dump1090"]
-    if {$debianPackageFile == ""} {
-		logger "unable to upgrade dump1090: failed to get name of package file"
-		return 0
-    }
-
-    if {[string first / $debianPackageFile] >= 0} {
-		logger "unable to upgrade dump1090: illegal character in version '$debianPackageFile'"
-		return 0
-    }
-
-    set requestUrl https://flightaware.com/adsb/piaware/files/$debianPackageFile
-	return [upgrade_dpkg_package dump1090 $requestUrl]
-}
-
-#
-# upgrade_dpkg_package - package name needs to be a legit fragment that could
-#  only match one package, url is where to get it from
-#
-proc upgrade_dpkg_package {name url} {
-	logger "considering upgrading $name from $url..."
-	if {![query_dpkg_name_and_version $name currentPackageName currentPackageVersion]} {
-		logger "unable to query current version of $name from dpkg"
-		return 0
-	}
-
-	set compare [compare_versions_from_packages $currentPackageVersion $url]
-
-	if {$compare > 0} {
-		logger "current version $currentPackageVersion is newer than requested $url, skipping..."
-		return 0
-	}
-
-	if {$name == "piaware"} {
-		if {[compare_versions_from_packages $::piawareVersion $url] > 0} {
-			logger "current version of piaware $::piawareVersion is newer than requested, skipping..."
-			return 0
-		}
-	}
-
-    logger "fetching latest $name version from $url"
-
-	set tmpFile "/tmp/[file tail $url]"
-
-	if {![fetch_url_as_binary_file $url $tmpFile]} {
-		return 0
-	}
-
-    logger "installing $name..."
-    run_program_log_output "dpkg -i $tmpFile"
-
-    logger "installing any required dependencies"
-    run_program_log_output "apt-get install -fy"
-
-	logger "upgrade of $name complete."
-    return 1
+    return [run_hook_script "upgrade_dump1090"]
 }
 
 #
@@ -660,10 +578,10 @@ proc upgrade_dpkg_package {name url} {
 # program, so it's a bit tricky
 #
 proc restart_piaware {} {
-	logger "restarting piaware. hopefully i'll be right back..."
-	system "/etc/init.d/piaware restart &"
-	sleep 10
-	logger "piaware failed to die, pid [pid]"
+    logger "restarting piaware. hopefully i'll be right back..."
+    run_hook_script("restart_piaware")
+    sleep 10
+    logger "piaware failed to die, pid [pid]"
 }
 
 #

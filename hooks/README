@@ -1,0 +1,3 @@
+This directory contains hook scripts invoked by piaware
+when it wants to run various maintenance actions. You
+can customize them as needed.

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Executed by piaware to stop any stray faup1090 instances.
+
+echo "$0: looking for faup1090 processes to kill:" >&2
+pgrep -u `id -u` /usr/bin/faup1090
+pkill -u `id -u` /usr/bin/faup1090

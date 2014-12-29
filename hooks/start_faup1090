@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Executed by piaware to start faup1090.
+# This hook will be backgrounded.
+
+exec /usr/bin/faup1090

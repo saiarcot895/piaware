@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Executed by piaware to try to upgrade the dump1090 packages
+
+echo "$0: trying to upgrade dump1090" >&2
+
+UPDATE_COMMAND="/usr/bin/apt-get -q --yes update"
+UPGRADE_COMMAND="/usr/bin/apt-get -q --yes --only-upgrade install dump1090-mr dump1090-mutability dump1090-flightaware"
+
+if sudo -n -l $UPDATE_COMMAND >/dev/null && sudo -n -l $UPGRADE_COMMAND >/dev/null
+then
+  set -e
+  sudo -n $UPDATE_COMMAND
+  sudo -n $UPGRADE_COMMAND
+  exit 0
+else
+  echo "$0: missing sudo permissions" >&2
+  exit 1
+fi
+
+exit 0

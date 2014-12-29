@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Executed by piaware to try to upgrade the piaware packages
+
+echo "$0: trying to upgrade piaware" >&2
+
+UPDATE_COMMAND="/usr/bin/apt-get -q --yes update"
+UPGRADE_COMMAND="/usr/bin/apt-get -q --yes --only-upgrade install piaware-mutability faup1090 tcllauncher"
+
+if sudo -n -l $UPDATE_COMMAND >/dev/null && sudo -n -l $UPGRADE_COMMAND >/dev/null
+then
+  set -e
+  sudo -n $UPDATE_COMMAND
+  sudo -n $UPGRADE_COMMAND
+  exit 0
+else
+  echo "$0: missing sudo permissions" >&2
+  exit 1
+fi
+

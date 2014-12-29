@@ -98,7 +98,7 @@ if 0 {
 
 	# attempt to kill any extant copies of faup1090
 	if {[is_process_running faup1090]} {
-		system "killall faup1090"
+		run_hook_script "stop_faup1090"
 		sleep 1
 	}
 
