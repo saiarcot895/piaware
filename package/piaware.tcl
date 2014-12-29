@@ -416,11 +416,24 @@ proc halt {} {
 # * reboot
 #
 proc update_operating_system_and_packages {} {
-	logger "updating operating system, packages, kernel, and then rebooting"
-    upgrade_raspbian_packages
-    upgrade_dump1090
-    upgrade_piaware
-    reboot
+    logger "updating operating system, packages, kernel, and then rebooting"
+    if {![upgrade_raspbian_packages]} {
+        return 0
+    }
+
+    if {![upgrade_dump1090]} {
+        return 0
+    }
+
+    if {![upgrade_piaware]} {
+        return 0
+    }
+
+    if {![reboot]} {
+        return 0
+    }
+
+    return 1
 }
 
 #
