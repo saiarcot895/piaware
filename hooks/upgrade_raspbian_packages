@@ -7,7 +7,7 @@ echo "$0: trying to upgrade Raspbian" >&2
 UPDATE_COMMAND="/usr/bin/apt-get -q --yes update"
 UPGRADE_COMMAND="/usr/bin/apt-get -q --yes upgrade"
 
-if sudo -n -l $UPDATE_COMMAND >/dev/null && sudo -n -l $UPGRADE_COMMAND >/dev/null
+if sudo -n -l $UPDATE_COMMAND >/dev/null 2>&1 && sudo -n -l $UPGRADE_COMMAND >/dev/null 2>&1
 then
   set -e
   sudo -n $UPDATE_COMMAND

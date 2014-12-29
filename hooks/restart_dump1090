@@ -7,7 +7,7 @@ echo "$0: trying to restart dump1090" >&2
 for choice in dump1090-mutability dump1090-flightaware dump1090-mr
 do
   if [ -x /etc/init.d/$choice ]; then
-    if sudo -n -l /etc/init.d/$choice restart >/dev/null; then
+    if sudo -n -l /etc/init.d/$choice restart >/dev/null 2>&1; then
       echo "trying /etc/init.d/$choice.." >&2
       if sudo -n /etc/init.d/$choice restart; then
         echo "started ok."

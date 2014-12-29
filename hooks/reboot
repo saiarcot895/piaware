@@ -4,9 +4,9 @@
 
 echo "$0: trying to reboot the machine" >&2
 
-if sudo -n -l /sbin/reboot >/dev/null; then
+if sudo -n -l /sbin/reboot >/dev/null 2>&1; then
   sudo -n /sbin/reboot
 else
-  echo "$0: no permission to attempt a reboot" >&2
+  echo "$0: missing sudo permissions" >&2
   exit 1
 fi

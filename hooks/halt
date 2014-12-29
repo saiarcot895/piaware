@@ -4,9 +4,9 @@
 
 echo "$0: trying to halt the machine" >&2
 
-if sudo -n -l /sbin/halt >/dev/null; then
+if sudo -n -l /sbin/halt >/dev/null 2>&1; then
   sudo -n /sbin/halt
 else
-  echo "$0: no permission to attempt a halt" >&2
+  echo "$0: missing sudo permissions" >&2
   exit 1
 fi
