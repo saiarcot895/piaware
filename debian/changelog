@@ -7,6 +7,8 @@ piaware-mutability (1.18-2+2mu-2) UNRELEASED; urgency=medium
   * Add Conflicts: piaware as both can't be installed at the same time.
   * Depend on adduser to fix lintian warning.
   * Add a config option to disable sending system health information.
+  * Add Build-Depends: tcl8.5 to allow the package index to be regenerated.
+  * Delete the generated package index during package clean.
 
  -- Oliver Jowett <oliver@mutability.co.uk>  Sun, 07 Dec 2014 22:13:35 +0000
 
