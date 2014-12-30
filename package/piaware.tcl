@@ -174,12 +174,22 @@ proc process_netstat_socket_line {line} {
     lassign $line proto recvq sendq localAddress foreignAddress state pidProg
     lassign [split $pidProg "/"] pid prog
 
-    if {($localAddress == "*:30005" || $localAddress == "localhost:30005") && $state == "LISTEN"} {
+    # NB: IPv6 addresses may contain colons
+    set localAddrHost [join [lrange [split $localAddress ":"] 0 end-1] ":"]
+    set localAddrPort [lindex [split $localAddress ":"] end]
+    set foreignAddrHost [join [lrange [split $foreignAddress ":"] 0 end-1] ":"]
+    set foreignAddrPort [lindex [split $foreignAddress ":"] end]
+
+    if {$pid == "-"} {
+        set prog "unknown-port-${localAddrPort}-process"
+    }
+
+    if {$localAddrPort == "30005" && $state == "LISTEN"} {
 		set ::netstatus(program_30005) $prog
 		set ::netstatus(status_30005) 1
     }
 
-    if {($localAddress == "*:10001" || $localAddress == "localhost:10001") && $state == "LISTEN"} {
+    if {$localAddrPort == "10001" && $state == "LISTEN"} {
 		set ::netstatus(program_10001) $prog
 		set ::netstatus(status_10001) 1
     }
@@ -187,18 +197,18 @@ proc process_netstat_socket_line {line} {
 
     switch $prog {
 		"faup1090" {
-			if {$foreignAddress == "localhost:30005" && $state == "ESTABLISHED"} {
+			if {$foreignAddrPort == "30005" && $state == "ESTABLISHED"} {
 				set ::netstatus(faup1090_30005) 1
 			}
 		}
 
 		"piaware" {
 			set ::running(piaware) 1
-			if {$foreignAddress == "localhost:10001" && $state == "ESTABLISHED"} {
+			if {$foreignAddrPort == "10001" && $state == "ESTABLISHED"} {
 				set ::netstatus(piaware_10001) 1
 			}
 
-			if {$foreignAddress == "eyes.flightaware.com:1200" && $state == "ESTABLISHED"} {
+			if {$foreignAddrPort == "1200" && $state == "ESTABLISHED"} {
 				set ::netstatus(piaware_1200) 1
 			}
 		}
@@ -218,7 +228,7 @@ proc inspect_sockets_with_netstat {} {
     set ::netstatus(piaware_10001) 0
     set ::netstatus(piaware_1200) 0
 
-    set fp [open "|netstat --program --protocol=inet --tcp --wide --all 2>/dev/null"]
+    set fp [open "|netstat --program --tcp --wide --all --numeric 2>/dev/null"]
     # discard two header lines
     gets $fp
     gets $fp
