@@ -106,6 +106,11 @@ if 0 {
 	load_adept_config_and_setup
 	#confirm_nonblank_user_and_password_or_die
 
+        if {[may_send_health_messages]} {
+            log_locally "piaware will include system information in periodic health messages."
+        } else {
+            log_locally "piaware will NOT include system information in periodic health messages."
+        }
 	adept connect
 
 	inspect_sockets_with_netstat
@@ -114,12 +119,9 @@ if 0 {
 
 	periodically_check_adsb_traffic
 
-        if {[may_send_health_messages]} {
-            log_locally "piaware will send periodic system health information."
-            after 30000 periodically_send_health_information
-        } else {
-            log_locally "piaware will NOT send periodic system health information (disabled in config file)"
-        }
+        # NB: if !may_send_health_messages, this will still periodically send an empty health message
+        # containing only the clock to keep the adept server happy
+        after 30000 periodically_send_health_information
 
     catch {vwait die}
 

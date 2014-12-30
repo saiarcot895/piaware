@@ -5,6 +5,8 @@ piaware-mutability (1.19-1mu-1) UNRELEASED; urgency=medium
   * Handle IPv6 in netstat output.
   * Use a placeholder process name when the real name of a listening
     process is not provided by netstat.
+  * When sending system health info is disabled, send empty health messages
+    to keep the adept server happy, rather than omitting them entirely.
 
  -- Oliver Jowett <oliver@mutability.co.uk>  Tue, 30 Dec 2014 00:27:48 +0000
 

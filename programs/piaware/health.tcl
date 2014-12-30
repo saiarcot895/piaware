@@ -67,11 +67,13 @@ proc is_adsb_program_running {} {
 #
 proc construct_health_array {_row} {
     upvar $_row row
-    catch {array set row [filesystem_usage]}
-	catch {set row(adsbprogram_running) [is_adsb_program_running]}
-    catch {set row(cputemp) [cpu_temperature]}
-    catch {set row(uptime) [get_uptime]}
 
+    if {[may_send_health_messages]} {
+        catch {array set row [filesystem_usage]}
+	catch {set row(adsbprogram_running) [is_adsb_program_running]}
+        catch {set row(cputemp) [cpu_temperature]}
+        catch {set row(uptime) [get_uptime]}
+        
 	if {[info exists ::netstatus(program_30005)]} {
 		set row(adsbprogram) $::netstatus(program_30005)
 	}
@@ -84,8 +86,9 @@ proc construct_health_array {_row} {
 		set row(local_ip) $ip
 		set row(local_iface) $iface
 	}
+    }
 
-	set row(type) health
+    set row(type) health
 
     # do clock last to maximize accurace
     set row(clock) [clock seconds]
