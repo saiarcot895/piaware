@@ -1,6 +1,6 @@
-piaware-mutability (1.19-1mu-1) UNRELEASED; urgency=medium
+piaware-mutability (1.19-3mu-1) UNRELEASED; urgency=medium
 
-  * Merge changes from upstream 1.19-1 package.
+  * Merge changes from upstream 1.19-{1,2,3} releases.
   * Use --numeric to speed up netstat output.
   * Handle IPv6 in netstat output.
   * Use a placeholder process name when the real name of a listening
@@ -11,6 +11,19 @@ piaware-mutability (1.19-1mu-1) UNRELEASED; urgency=medium
     the FA server as well as logged locally (they may contain sensitive data).
 
  -- Oliver Jowett <oliver@mutability.co.uk>  Tue, 30 Dec 2014 00:27:48 +0000
+
+piaware (1.19-3) stable; urgency=medium
+
+  * The 1.19-2 package was corrupted.  We always bump the version for every
+    change due to CDN caching and whatnot.
+
+ -- FlightAware Developers <adsb-devs@flightaware.com>  Tue, 30 Dec 2014 22:32:41 +0000
+
+piaware (1.19-2) stable; urgency=medium
+
+  * Compress the ADS-B messages, not just the non-ADS-B messages.
+
+ -- FlightAware Developers <adsb-devs@flightaware.com>  Tue, 30 Dec 2014 21:02:44 +0000
 
 piaware (1.19-1) stable; urgency=medium
 
