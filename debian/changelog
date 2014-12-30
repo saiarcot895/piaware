@@ -1,3 +1,23 @@
+piaware-mutability (1.19-1mu-1) UNRELEASED; urgency=medium
+
+  * Merge changes from upstream 1.19-1 package.
+
+ -- Oliver Jowett <oliver@mutability.co.uk>  Tue, 30 Dec 2014 00:27:48 +0000
+
+piaware (1.19-1) stable; urgency=medium
+
+  * New compression techniques reduce upstream bandwidth by 2/3rds without
+    filtering any additional messages.
+
+  * Disconnect from the server after many unrecognized server messages.
+
+  * Report full version when running piaware -v to get version number.
+
+  * Remove raspi-copies-and-fills from dependencies.  This makes the piaware
+  Debian package compatible with more systems not based on Raspberry Pi.
+
+ -- FlightAware Developers <adsb-devs@flightaware.com>  Tue, 25 Nov 2014 19:26:29 +0000
+
 piaware-mutability (1.18-2+2mu-2) unstable; urgency=medium
 
   * Remove redundant override_dh_install in debian/rules
