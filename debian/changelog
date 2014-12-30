@@ -7,6 +7,8 @@ piaware-mutability (1.19-1mu-1) UNRELEASED; urgency=medium
     process is not provided by netstat.
   * When sending system health info is disabled, send empty health messages
     to keep the adept server happy, rather than omitting them entirely.
+  * Add a sendLogMessages option to control whether log messages are sent to
+    the FA server as well as logged locally (they may contain sensitive data).
 
  -- Oliver Jowett <oliver@mutability.co.uk>  Tue, 30 Dec 2014 00:27:48 +0000
 

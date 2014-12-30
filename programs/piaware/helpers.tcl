@@ -12,7 +12,9 @@ package require tls
 proc logger {text} {
 	#::bsd::syslog log info $text
 	log_locally $text
-	adept send_log_message $text
+        if {[may_send_log_messages]} {
+            adept send_log_message $text
+        }
 }
 
 #
@@ -214,6 +216,22 @@ proc may_send_health_messages {} {
     }
 
     return $::adeptConfig(sendHealthInfo)
+}
+
+#
+# may_send_log_messages: return true if we are permitted to send log
+# messages to FA
+#
+proc may_send_log_messages {} {
+    if {![info exists ::adeptConfig(sendLogMessages)]} {
+        return 1
+    }
+
+    if {![string is boolean $::adeptConfig(sendLogMessages)]} {
+        return 0
+    }
+
+    return $::adeptConfig(sendLogMessages)
 }
 
 

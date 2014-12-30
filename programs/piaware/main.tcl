@@ -111,6 +111,13 @@ if 0 {
         } else {
             log_locally "piaware will NOT include system information in periodic health messages."
         }
+
+        if {[may_send_log_messages]} {
+            log_locally "piaware will forward log messages to FlightAware."
+        } else {
+            log_locally "piaware will NOT forward log messages to FlightAware."
+        }
+
 	adept connect
 
 	inspect_sockets_with_netstat
