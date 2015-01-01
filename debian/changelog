@@ -1,4 +1,4 @@
-piaware-mutability (1.19-3mu-1) UNRELEASED; urgency=medium
+piaware-mutability (1.19-3mu-1) unstable; urgency=medium
 
   * Merge changes from upstream 1.19-{1,2,3} releases.
   * Use --numeric to speed up netstat output.
@@ -9,8 +9,10 @@ piaware-mutability (1.19-3mu-1) UNRELEASED; urgency=medium
     to keep the adept server happy, rather than omitting them entirely.
   * Add a sendLogMessages option to control whether log messages are sent to
     the FA server as well as logged locally (they may contain sensitive data).
+  * Support configuration via debconf.
+  * Move fatsv-data-source dependency to Recommends.
 
- -- Oliver Jowett <oliver@mutability.co.uk>  Tue, 30 Dec 2014 00:27:48 +0000
+ -- Oliver Jowett <oliver@mutability.co.uk>  Thu, 01 Jan 2015 22:23:52 +0000
 
 piaware (1.19-3) stable; urgency=medium
 
