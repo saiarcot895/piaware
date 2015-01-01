@@ -5,3 +5,4 @@ programs/piaware-config/*.tcl usr/lib/piaware-config
 programs/piaware-status/*.tcl usr/lib/piaware-status
 debian/piaware_sudoers etc/sudoers.d
 hooks/* etc/piaware.hooks
+debian/config-template usr/share/piaware-mutability

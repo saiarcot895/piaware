@@ -17,16 +17,96 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+NAME=piaware-mutability
+CONFIGFILE=/etc/default/$NAME
+TEMPLATECONFIG=/usr/share/$NAME/config-template
+SEDSCRIPT=$CONFIGFILE.sed.tmp
+ADEPTCONFIGFILE=/etc/piaware.adept.conf
+
+subvar_raw() {
+  # $1 = db var value
+  # $2 = config var name
+
+  # if not present in the config file, add it
+  test -z "$1" || grep -Eq "^ *$2=" $CONFIGFILE || echo "$2=" >> $CONFIGFILE
+  # add to the sedscript
+  echo "s@^ *$2=.*@$2=\"$1\"@" >>$SEDSCRIPT
+}
+
+subvar() {
+  # $1 = db var name
+  # $2 = config var name
+  db_get $NAME/$1
+  subvar_raw "$RET" "$2"
+}
+
+subvar_yn() {
+  # $1 = db var name
+  # $2 = config var name
+  db_get $NAME/$1
+  if [ "$RET" = "true" ]; then subvar_raw "yes" "$2"; else subvar_raw "no" "$2"; fi
+}
+
+set_adept_config_str() {    
+    db_get $NAME/$1; if [ -n "$RET" ]; then echo "$2 $RET" >>$ADEPTCONFIGFILE.tmp; fi
+}
+
+set_adept_config_bool() {
+    db_get $NAME/$1
+    case "$RET" in
+        true) echo "$2 1" >>$ADEPTCONFIGFILE.tmp ;;
+        false) echo "$2 0" >>$ADEPTCONFIGFILE.tmp ;;
+        *) ;;
+    esac
+}
 
 case "$1" in
     configure)
-        adduser --system --group --home /usr/lib/piaware --no-create-home --quiet piaware
-	if [ ! -f /etc/piaware.adept.conf ]; then
+        . /usr/share/debconf/confmodule
+
+        # Generate/update /etc/default/piaware-mutability
+
+        # Generate config file, if it doesn't exist.
+        if [ ! -e $CONFIGFILE ]; then
+            tail -n +4 $TEMPLATECONFIG >$CONFIGFILE
+        fi
+
+        rm -f $SEDSCRIPT
+
+        subvar_yn auto-start START_PIAWARE
+        subvar run-as-user PIAWARE_USER
+        subvar log-file LOGFILE
+        subvar extra-args EXTRA_ARGS
+
+        cp -a -f $CONFIGFILE $CONFIGFILE.tmp
+        sed -f $SEDSCRIPT < $CONFIGFILE > $CONFIGFILE.tmp
+        mv -f $CONFIGFILE.tmp $CONFIGFILE
+        rm $SEDSCRIPT
+
+        # Generate/update /etc/piaware.adept.conf
+        cat </dev/null >$ADEPTCONFIGFILE.tmp
+        chmod 0600 $ADEPTCONFIGFILE.tmp
+        set_adept_config_str flightaware-user user
+        set_adept_config_str flightaware-password password
+        set_adept_config_bool allow-auto-updates autoUpdate
+        set_adept_config_bool allow-manual-updates manualUpdate
+        set_adept_config_bool allow-health-info sendHealthInfo
+        set_adept_config_bool allow-log-messages sendLogMessages
+        mv $ADEPTCONFIGFILE.tmp $ADEPTCONFIGFILE
+
+        # remove the password from the config DB
+        # it will be re-read from the adept config on reconfigure
+        db_set $NAME/flightaware-password ""
+
+        db_get $NAME/auto-start
+        if [ "$RET" = "true" ]; then
+          db_get $NAME/run-as-user
+          adduser --system --group --home /usr/lib/piaware --no-create-home --quiet "$RET"
+
 	  # piaware.adept.conf will hold passwords etc;
 	  # make it writable by root and readable by the piaware group,
 	  # but otherwise unreadable.
-          touch /etc/piaware.adept.conf
-	  chown root:piaware /etc/piaware.adept.conf
+	  chown root:"$RET" /etc/piaware.adept.conf
 	  chmod 0640 /etc/piaware.adept.conf
         fi
     ;;
@@ -45,4 +125,5 @@ esac
 
 #DEBHELPER#
 
+if [ "$1" = "configure" ]; then db_stop; fi
 exit 0

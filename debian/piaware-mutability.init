@@ -25,14 +25,14 @@ SCRIPTNAME=/etc/init.d/$NAME
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
 
-# Set defaults:
-START_PIAWARE=no
-PIAWARE_USER=piaware
-LOGFILE=/var/log/$NAME.log
-EXTRA_ARGS=
-
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# work out daemon args
+
+# sanitize missing settings
+[ -z "$START_PIAWARE" ] && START_PIAWARE=no
+[ -z "$PIAWARE_USER" ] && PIAWARE_USER="missing-PIAWARE_USER-setting-in-config"
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh

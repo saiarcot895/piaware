@@ -1,0 +1,126 @@
+Template: piaware-mutability/auto-start
+Description: Start piaware automatically?
+ piaware can be started automatically via an init-script.
+ Otherwise, the init-script does nothing; you must run piaware by hand.
+ .
+ You can modify the options used when automatically starting
+ piaware by running "dpkg-reconfigure piaware-mutability" as root,
+ by editing /etc/default/piaware-mutability, or by running piaware-config.
+Type: boolean
+Default: true
+
+Template: piaware-mutability/run-as-user
+Description: User to run piaware as:
+ When started automatically, piaware runs as an unprivileged system user. 
+ This user will be created if it does not yet exist.
+Type: string
+Default: piaware
+
+Template: piaware-mutability/log-file
+Description: Path to log to:
+ When started automatically, piaware will log its output somewhere.
+Type: string
+Default: /var/log/piaware-mutability.log
+
+Template: piaware-mutability/extra-args
+Description: Extra arguments to pass to piaware:
+ Here you can add any extra arguments you want to pass to piaware.
+Type: string
+Default:
+
+Template: piaware-mutability/flightaware-user
+Description: FlightAware user to feed as:
+ If you provide your FlightAware username, piaware can authenticate to
+ FlightAware so that your data feed is automatically associated with your
+ account.
+ .
+ If you leave this blank, piaware will feed under a pseudonymous guest
+ account. You will need to "claim" your receiver via the FlightAware web
+ page to associate the feed with your account.
+Type: string
+Default:
+
+Template: piaware-mutability/flightaware-password
+Description: FlightAware password:
+ piaware needs your FlightAware password to authenticate to the FlightAware
+ servers.
+Type: password
+Default:
+
+Template: piaware-mutability/allow-auto-updates
+Description: Allow automatic updates triggered by FlightAware?
+ piaware can process automatic update requests from FlightAware to update
+ itself or other parts of the system.
+ .
+ You can enable or disable whether automatic updates are allowed here.
+ .
+ If you enable automatic updates, you will also need to grant additional
+ "sudo" permissions to the piaware user by editing the
+ /etc/sudoers.d/piaware_sudoers file.
+Type: boolean
+Default: false
+
+Template: piaware-mutability/allow-manual-updates
+Description: Allow manual updates triggered from the web control panel?
+ piaware can process manual update requests made from the FlightAware
+ ADS-B control panel webpage.
+ .
+ You can enable or disable whether manual updates are allowed here.
+ .
+ If you enable manual updates, you will also need to grant additional
+ "sudo" permissions to the piaware user by editing the
+ /etc/sudoers.d/piaware_sudoers file.
+Type: boolean
+Default: false
+
+Template: piaware-mutability/note-about-sudoers
+Description: Manual changes to sudoers file required
+ For automatic or manual updates to work correctly, piaware must gain
+ root privileges to perform system update operations. The default
+ update scripts use "sudo" to do this.
+ .
+ This package provides an example sudoers file that grants these
+ extra permissions in /etc/sudoers.d/piaware_sudoers. However, all of
+ these permissions are initially commented out. You must edit this file
+ to uncomment and enable the permissions before updates will work
+ correctly.
+ .
+ To edit this file, use visudo: "sudo visudo -f /etc/sudoers.d/piaware_sudoers".
+ .
+ You can control what changes to your system piaware updates may make
+ by selectively granting permissions, or by changing the hook
+ scripts contained in /etc/piaware.hooks/
+Type: note
+
+Template: piaware-mutability/allow-health-info
+Description: Send system health information to FlightAware?
+ piaware can send periodic system health information to FlightAware to
+ help them identify problems with particular feeders.
+ .
+ The information sent is:
+ .
+  * System uptime
+  * Local IP address and gateway
+  * Details of any processes listening on local ports 10001 or 30005
+  * CPU temperature
+  * Free space on each filesystem
+ .
+ Sending this information is optional and can be enabled or disabled here.
+Type: boolean
+Default: false
+
+Template: piaware-mutability/allow-log-messages
+Description: Send piaware log messages to FlightAware?
+ piaware can send a copy of locally-generated log message to FlightAware
+ to help them identify problems with particular feeders.
+ .
+ These log messages potentially could contain additional information about
+ your system that is not directly related to piaware.
+ .
+ Sending this information is optional and can be enabled or disabled here.
+Type: boolean
+Default: false
+
+Template: piaware-mutability/invalid-is_not_empty
+Description: Value cannot be empty.
+Type: error
