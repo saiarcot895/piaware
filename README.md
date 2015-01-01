@@ -102,3 +102,12 @@ other things are running and someone is looking after it locally.
 This package adds configuration options that allow you to disable the sending of
 this information.
 
+# Building the package
+
+This package is intended to be built using the normal Debian package building
+tools:
+
+````
+sudo apt-get install build-essential debhelper tcl8.5
+dpkg-buildpackage -b      # or debuild, or pdebuild, etc
+````
