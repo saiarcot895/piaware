@@ -1,7 +1,7 @@
 # PiAware
 
 This is a repackaging of the official FlightAware version of piaware.
-For the original docs, see [README-upstream.md].
+For the original docs, see [README-upstream.md](README-upstream.md).
 
 # Installation
 
