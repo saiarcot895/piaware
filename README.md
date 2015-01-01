@@ -3,7 +3,12 @@
 This is a repackaging of the official FlightAware version of piaware.
 For the original docs, see [README-upstream.md](README-upstream.md).
 
+This version is based on FlightAware's 1.19-3 release.
+
 # Installation
+
+Warning: This package conflicts with the standard piaware package. You must
+uninstall the standard piaware package before installing piaware-mutability.
 
 The recommended way to install piaware-mutability is from the mutability.co.uk
 repository.
@@ -16,21 +21,22 @@ $ wget https://github.com/mutability/mutability-repo/releases/download/v0.1.0/mu
 $ sudo dpkg -i mutability-repo_0.1.0_armhf.deb
 ````
 
-Then use apt-get to install piaware-mutability, plus at least one package that
-provides a FATSV-format feed:
+Then use apt-get to install piaware-mutability:
 
 ````
-$ sudo apt-get update && sudo apt-get install piaware-mutability dump1090-mutability
+$ sudo apt-get update && sudo apt-get install piaware-mutability
 ````
 
-Currently there are three packages that provide a FATSV-format feed. You'll need
-at least one:
+You probably also want a package that provide a FATSV-format feed. Currently
+these packages provide one:
 
  * faup1090: a FlightAware utility that converts Beast-format data from an
    existing source into the FATSV format;
  * dump1090-flightaware: the FlightAware version of dump1090 that directly
    supports FATSV;
  * dump1090-mutability: also directly supports FATSV.
+
+Other software such as modesmixer2 will also work (but isn't packaged).
 
 piaware-mutability will be upgraded to new versions automatically when you
 upgrade other packages:
