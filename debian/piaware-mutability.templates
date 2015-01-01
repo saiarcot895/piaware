@@ -107,7 +107,7 @@ Description: Send system health information to FlightAware?
  .
  Sending this information is optional and can be enabled or disabled here.
 Type: boolean
-Default: false
+Default: true
 
 Template: piaware-mutability/allow-log-messages
 Description: Send piaware log messages to FlightAware?
@@ -119,7 +119,7 @@ Description: Send piaware log messages to FlightAware?
  .
  Sending this information is optional and can be enabled or disabled here.
 Type: boolean
-Default: false
+Default: true
 
 Template: piaware-mutability/invalid-is_not_empty
 Description: Value cannot be empty.
