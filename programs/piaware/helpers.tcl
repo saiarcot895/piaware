@@ -223,6 +223,11 @@ proc may_send_health_messages {} {
 # messages to FA
 #
 proc may_send_log_messages {} {
+    if {[llength [info commands "adept"]] < 1} {
+        # adept client has not yet loaded
+        return 0
+    }
+
     if {![info exists ::adeptConfig(sendLogMessages)]} {
         return 1
     }
