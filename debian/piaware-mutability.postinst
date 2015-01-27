@@ -92,6 +92,7 @@ case "$1" in
         set_adept_config_bool allow-manual-updates manualUpdate
         set_adept_config_bool allow-health-info sendHealthInfo
         set_adept_config_bool allow-log-messages sendLogMessages
+        set_adept_config_str site-id overrideMAC
         mv $ADEPTCONFIGFILE.tmp $ADEPTCONFIGFILE
 
         # remove the password from the config DB

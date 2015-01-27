@@ -694,6 +694,10 @@ namespace eval ::fa_adept {
 	#  if we can't find any mac address at all then return an empty string
 	#
 	method get_mac_address {} {
+                if {[info exists ::adeptConfig(overrideMAC)]} {
+                        return $::adeptConfig(overrideMAC)
+                }
+
 		if {[info exists ::macAddress]} {
 			return $::macAddress
 		}

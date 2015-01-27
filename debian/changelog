@@ -1,3 +1,9 @@
+piaware-mutability (1.19-3mu-2) unstable; urgency=medium
+
+  * Add an overrideMAC option to allow specifying a site ID manually.
+
+ -- Oliver Jowett <oliver@mutability.co.uk>  Tue, 27 Jan 2015 13:07:37 +0000
+
 piaware-mutability (1.19-3mu-1) unstable; urgency=medium
 
   * Merge changes from upstream 1.19-{1,2,3} releases.

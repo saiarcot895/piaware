@@ -47,6 +47,22 @@ Description: FlightAware password:
 Type: password
 Default:
 
+Template: piaware-mutability/site-id
+Description: Site ID / MAC address (blank to use default):
+ FlightAware identifies your site by the MAC address of the main network
+ interface of the machine running piaware. If you change hardware, the
+ MAC address may change and therefore FlightAware will see the feeder as
+ a brand new site.
+ .
+ To retain your site history, here you can override the site ID with an
+ address of your own choice. It should be a MAC address in the form
+ aa:bb:cc:dd:ee:ff. You can find the existing site ID from the FlightAware
+ "My ADS-B" page, listed as "Site Identifier".
+ .
+ If left blank, the site ID is derived from the main network interface.
+Type: string
+Default:
+
 Template: piaware-mutability/allow-auto-updates
 Description: Allow automatic updates triggered by FlightAware?
  piaware can process automatic update requests from FlightAware to update
@@ -123,4 +139,8 @@ Default: true
 
 Template: piaware-mutability/invalid-is_not_empty
 Description: Value cannot be empty.
+Type: error
+
+Template: piaware-mutability/invalid-is_empty_or_mac
+Description: MAC address should either be blank, or in the form 01:23:45:67:89:ab.
 Type: error
