@@ -9,8 +9,10 @@ piaware-mutability (1.20-1mu-1) unstable; urgency=medium
   * Remove the retry schedule on init.d stop, as it interferes with upgrades
     where piaware is the parent of a package upgrade that tries to stop
     piaware.
+  * Ignore SIGTERM et all while running hook scripts.
+  * Don't clean up the pidfile in the init.d script, let piaware do that.
 
- -- Oliver Jowett <oliver@mutability.co.uk>  Fri, 06 Feb 2015 18:50:23 +0000
+ -- Oliver Jowett <oliver@mutability.co.uk>  Fri, 06 Feb 2015 19:26:43 +0000
 
 piaware-mutability (1.19-3mu-2) unstable; urgency=medium
 

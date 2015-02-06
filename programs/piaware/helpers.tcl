@@ -137,6 +137,7 @@ proc remove_pidfile {} {
 # setup_signals - arrange for common signals to shutdown the program
 #
 proc setup_signals {} {
+        set ::ignoreShutdown 0
 	signal trap HUP "shutdown %S"
 	signal trap TERM "shutdown %S"
 	signal trap INT "shutdown %S"
@@ -146,8 +147,12 @@ proc setup_signals {} {
 # shutdown - shutdown signal handler
 #
 proc shutdown {{reason ""}} {
+    if {! $::ignoreShutdown} {
 	logger "$::argv0 (process [pid]) is shutting down because it received a shutdown signal ($reason) from the system..."
 	cleanup_and_exit
+    } else {
+        log_locally "Ignoring shutdown signal as we are running a hook script"
+    }
 }
 
 #

@@ -467,16 +467,19 @@ proc upgrade_raspbian_packages {} {
 proc run_hook_script {type} {
     logger "*** running hook script '$::piawareHookDir/$type' and logging output"
 
+    set ::ignoreShutdown 1
     unset -nocomplain ::externalProgramFinished
 
     if {[catch {set fp [open "|$::piawareHookDir/$type 2>@1"]} catchResult] == 1} {
 		logger "*** error attempting to start command: $catchResult"
+                set ::ignoreShutdown 0
 		return 0
     }
 
     fileevent $fp readable [list external_program_data_available $fp]
 
     vwait ::externalProgramFinished
+    set ::ignoreShutdown 0
     return $::externalProgramSuccess
 }
 
