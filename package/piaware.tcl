@@ -607,7 +607,8 @@ proc restart_piaware {} {
     logger "restarting piaware. hopefully i'll be right back..."
     exec_hook_script_in_background "restart_piaware"
     sleep 10
-    logger "piaware failed to die, pid [pid]"
+    logger "piaware failed to die, pid [pid], that's me, i'm gonna kill myself"
+    exit 0
 }
 
 #
