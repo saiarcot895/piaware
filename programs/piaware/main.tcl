@@ -30,7 +30,7 @@ proc main {{argv ""}} {
     set options {
         {p.arg "" "specify the name of a file to write our pid in"}
         {serverport.arg "1200" "specify alternate server port (for FA testing)"}
-        {debug  "log to stdout rather than the log file"}
+        {debug  "retained for backwards compatibility only, does nothing"}
         {showtraffic  "emit traffic to stdout (for debugging)"}
         {debugport.arg "0" "open a localhost-only port to the tcl interpreter"}
         {v  "emit version information and exit"}
@@ -87,12 +87,6 @@ if 0 {
 		logger "starting console server on port $::params(debugport) due to -debugport argument to piaware"
 		IpConsole console
 		console setup_server -port $::params(debugport)
-	}
-
-	# start logging to a file unless configured for debug
-	if {!$::params(debug)} {
-		log_stdout_stderr_to_file
-		schedule_logfile_switch
 	}
 
 	greetings

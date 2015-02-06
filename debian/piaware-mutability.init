@@ -72,7 +72,7 @@ do_start()
         chown $PIAWARE_USER $LOGFILE
         
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --user $PIAWARE_USER --chuid $PIAWARE_USER --background --no-close --exec $DAEMON -- \
-		-p $PIDFILE -debug $EXTRA_ARGS >>$LOGFILE 2>&1 \
+		-p $PIDFILE $EXTRA_ARGS >>$LOGFILE 2>&1 \
 		|| return 2
         sleep 1
 }
