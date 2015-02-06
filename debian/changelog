@@ -1,4 +1,4 @@
-piaware-mutability (1.20-1mu-1) UNRELEASED; urgency=medium
+piaware-mutability (1.20-1mu-1) unstable; urgency=medium
 
   * Merge changes from upstream 1.20-1
     * From upstream: Have piaware exit if not killed by a restart
@@ -6,7 +6,7 @@ piaware-mutability (1.20-1mu-1) UNRELEASED; urgency=medium
   * Always log to stdout, never to /tmp, to reduce confusion when migrating
     from FlightAware piaware.
 
- -- Oliver Jowett <oliver@mutability.co.uk>  Fri, 06 Feb 2015 18:10:01 +0000
+ -- Oliver Jowett <oliver@mutability.co.uk>  Fri, 06 Feb 2015 18:34:17 +0000
 
 piaware-mutability (1.19-3mu-2) unstable; urgency=medium
 
