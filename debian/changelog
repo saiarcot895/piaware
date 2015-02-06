@@ -6,7 +6,11 @@ piaware-mutability (1.20-1mu-1) unstable; urgency=medium
   * Always log to stdout, never to /tmp, to reduce confusion when migrating
     from FlightAware piaware.
 
- -- Oliver Jowett <oliver@mutability.co.uk>  Fri, 06 Feb 2015 18:34:17 +0000
+  * Remove the retry schedule on init.d stop, as it interferes with upgrades
+    where piaware is the parent of a package upgrade that tries to stop
+    piaware.
+
+ -- Oliver Jowett <oliver@mutability.co.uk>  Fri, 06 Feb 2015 18:50:23 +0000
 
 piaware-mutability (1.19-3mu-2) unstable; urgency=medium
 
