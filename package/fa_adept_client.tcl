@@ -413,13 +413,16 @@ namespace eval ::fa_adept {
 		# if there is a var in the adept config and it's not a boolean or
 		# it's false, bail.
 		#
-		if {[info exists ::adeptConfig($varName)]} {
+		if {![info exists ::adeptConfig($varName)]} {
+			logger "$varName is not set in adept config, looking further..."
+		} else {
 			if {![string is boolean $::adeptConfig($varName)]} {
 				logger "$varName in adept config isn't a boolean, bailing on update request"
 				return 0
 			}
 
 			if {!$::adeptConfig($varName)} {
+				logger "$varName in adept config is disabled, disallowing update"
 				return 0
 			} else {
 				# the var is there and set to true, we proceed with the update
@@ -434,14 +437,21 @@ namespace eval ::fa_adept {
 				logger "$varName in /etc/piaware isn't a boolean, bailing on update request"
 				return 0
 			} else {
-				# the var is there and true, proceed
-				logger "$varName in /etc/piaware is enabled, allowing update"
-				return 1
+				if {$val} {
+					# the var is there and true, proceed
+					logger "$varName in /etc/piaware is enabled, allowing update"
+					return 1
+				} else {
+					# the var is there and false, bail
+					logger "$varName in /etc/piaware is disabled, disallowing update"
+					return 0
+				}
 			}
 		}
 
 		# this shouldn't happen
-		error "software error in handle_shutdown_message"
+		logger "software error detected in update_check, disallowing update"
+		return 0
 	}
 
 	#
@@ -542,6 +552,9 @@ namespace eval ::fa_adept {
 	method handle_alive_message {_row} {
 		upvar $_row row
 
+		# get the system clock on the local pi
+		set now [clock seconds]
+
 		if {![info exists row(interval)]} {
 			set row(interval) 300
 		}
@@ -558,6 +571,10 @@ namespace eval ::fa_adept {
 		# schedule alive_timeout to run in the future
 		set aliveTimerID [after $afterMS [list $this alive_timeout]]
 		#log_locally "handle_alive_message: alive timer ID is $aliveTimerID"
+
+		if {[info exists row(clock)]} {
+			set ::myClockOffset [expr {$now - $row(clock)}]
+		}
 	}
 
 	#
@@ -673,6 +690,10 @@ namespace eval ::fa_adept {
 		set message(type) log
 		set message(message) [string map {\n \\n \t \\t} $text]
 		set message(mac) [get_mac_address_or_quit]
+
+		if {[info exists ::myClockOffset]} {
+			set message(offset) $::myClockOffset
+		}
 
 		foreach var "user" globalVar "::flightaware_user" {
 			if {[info exists $globalVar]} {
