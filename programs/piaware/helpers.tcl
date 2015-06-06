@@ -1,3 +1,4 @@
+# -*- mode: tcl; tab-width: 4; indent-tabs-mode: t -*-
 #
 # fa_adept_client - open data exchange protocol server
 #
@@ -48,9 +49,16 @@ proc user_check {} {
 # setup_adept_client - adept client-side setup
 #
 proc setup_adept_client {} {
+	if {$::params(serverhosts) == ""} {
+		set hostOptions ""
+	} else {
+		set hostOptions "-hosts $::params(serverhosts)"
+	}
+
     ::fa_adept::AdeptClient adept \
 		-port $::params(serverport) \
-		-showTraffic $::params(showtraffic)
+		-showTraffic $::params(showtraffic) \
+		{*}$hostOptions
 }
 
 #
@@ -161,6 +169,7 @@ proc shutdown {{reason ""}} {
 #
 proc cleanup_and_exit {} {
 	stop_faup1090
+	disable_mlat
 	remove_pidfile
 	logger "$::argv0 (process [pid]) is exiting..."
 	exit 0

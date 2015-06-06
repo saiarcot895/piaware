@@ -67,6 +67,7 @@ proc load_piaware_config_and_stuff {} {
 		if {[query_dpkg_name_and_version "piaware-mutability" packageName packageVersion]} {
 			set ::imageType "${packageName}_package"
 			set ::fullVersionID $packageVersion
+			set ::shortVersionID [lindex [split $packageVersion "-"] 0]
 		}
     }
 }
