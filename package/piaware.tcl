@@ -66,8 +66,7 @@ proc load_piaware_config_and_stuff {} {
     if {![info exists ::imageType]} {
 		if {[query_dpkg_name_and_version "piaware-mutability" packageName packageVersion]} {
 			set ::imageType "${packageName}_package"
-			set ::fullVersionID $packageVersion
-			set ::shortVersionID [lindex [split $packageVersion "-"] 0]
+			set ::piawarePackageVersion $packageVersion
 		}
     }
 }
@@ -132,6 +131,29 @@ proc is_piaware_running {} {
     }
 
     return [is_pid_running $pid]
+}
+
+#
+# dump1090_any_bad_args - check for bad args (--no-crc-check,
+#  --agressive). Returns 1 if found, 0 if not
+#
+proc dump1090_any_bad_args {} {
+	
+	set fp [open "|ps auxww | grep dump1090"]
+
+	set bad_args [list "--no-crc-check" "--aggressive"]
+
+	while {[gets $fp pid] >= 0} {
+        foreach arg $bad_args {
+			 # search the process for bad arguments
+             if {[string last $arg $pid] != -1} {
+				return 1
+             }
+        }
+	}
+	close $fp
+	
+	return 0
 }
 
 #
@@ -557,10 +579,23 @@ proc fetch_url_as_string {url} {
 }
 
 #
+# fetch_url_as_binary_file_callback - callback routine for
+#   fetch_url_as_binary_file_callback for the completion or timeout
+#   of http requests
+#
+proc fetch_url_as_binary_file_callback {sock token} {
+	# ok we got the callback, set the global variable
+	# that fetch_url_as_binary_file is vwaiting on,
+	# so that it can go on
+	set ::fetchUrlVwaitVar 1
+}
+
+
+#
 # fetch_url_as_binary_file - fetch the URL to the file, 1 on success else 0
 #
 proc fetch_url_as_binary_file {url outputFile} {
-    set req [::http::geturl $url -timeout 15000 -binary 1 -strict 0]
+    set req [::http::geturl $url -timeout 900000 -binary 1 -strict 0]
 
     set status [::http::status $req]
     set data [::http::data $req]

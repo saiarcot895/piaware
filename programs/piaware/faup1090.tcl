@@ -1,3 +1,4 @@
+# -*- mode: tcl; tab-width: 4; indent-tabs-mode: t -*-
 #
 # piaware - aviation data exchange protocol ADS-B client
 #
@@ -402,12 +403,103 @@ proc stop_faup1090_close_faup1090_socket_and_reopen {} {
 	close_faup1090_socket_and_reopen
 }
 
+proc has_invoke_rcd {} {
+	if {![info exists ::invoke_rcd_path]} {
+		set ::invoke_rcd_path [auto_execok invoke-rc.d]
+	}
+
+	if {$::invoke_rcd_path ne ""} {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+proc can_invoke_service_action {service action} {
+	# try to decide if we should invoke the given service/action
+	if {![has_invoke_rcd]} {
+		# no invoke-rc.d, just see if we can run the script
+		if {[auto_execok "/etc/init.d/$service"] eq ""} {
+			return 0
+		} else {
+			return 1
+		}
+	}
+
+	set status [system invoke-rc.d --query $service $action]
+	switch $status {
+		104 -
+		105 -
+		106 {
+			return 1
+		}
+
+		default {
+			return 0
+		}
+	}
+}
+
+proc invoke_service_action {service action} {
+	if {![has_invoke_rcd]} {
+		# no invoke-rc.d, just run the script
+		set command [list /etc/init.d/$service $action]
+	} else {
+		# use invoke-rc.d
+		set command [list invoke-rc.d $service $action]
+	}
+
+	logger "attempting to $action $service using '$command'..."
+	return [system $command]
+}
+
+
 #
 # attempt_dump1090_restart - restart dump1090 if we can figure out how to
 #
 proc attempt_dump1090_restart {{action restart}} {
-    logger "attempting to $action dump1090..."
-    run_hook_script "${action}_dump1090"
+	set scripts [glob -nocomplain -directory /etc/init.d -tails -types {f r x} *dump1090*]
+
+	foreach script $scripts {
+		switch -glob $script {
+			*.dpkg*	-
+			*.rpm* -
+			*.ba* -
+			*.old -
+			*.org -
+			*.orig -
+			*.save -
+			*.swp -
+			*.core -
+			*~ {
+				# Skip this
+			}
+
+			default {
+				# check invoke-rc.d etc
+				if {[can_invoke_service_action $script $action]} {
+					lappend acceptableScripts $script
+				}
+			}
+		}
+	}
+
+	if { [info exists acceptableScripts] } {
+		set service [lindex $acceptableScripts 0]
+		if { [llength $acceptableScripts] > 1 } {
+			logger "warning, more than one enabled dump1090 script in /etc/init.d, proceding with '$service'..."
+		}
+
+		set exitStatus [invoke_service_action $service $action]
+
+		if {$exitStatus == 0} {
+			logger "dump1090 $action appears to have been successful"
+		} else {
+			logger "got exit status $exitStatus while trying to $action dump1090"
+		}
+	} else { 
+		logger "can't $action dump1090, no enabled dump1090 script in /etc/init.d"
+	}
 }
 
 #

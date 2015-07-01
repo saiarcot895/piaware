@@ -10,6 +10,23 @@ set ::mlatEnabled 0
 set ::mlatReady 0
 # interval between client restarts
 set ::mlatRestartMillis 60000
+# UDP transport info
+set ::mlatUdpTransport {}
+
+proc find_mlat_client {} {
+	if {![info exists ::mlatClientPath]} {
+		set candidates [list "/usr/lib/fa-mlat-client/fa-mlat-client" \
+						"fa-mlat-client"]
+		foreach candidate $candidates {
+			set ::mlatClientPath [auto_execok $candidate]
+			if {$::mlatClientPath ne ""} {
+				break
+			}
+		}
+	}
+
+	return $::mlatClientPath
+}
 
 proc mlat_is_configured {} {
 	if {[info exists ::adeptConfig(mlat)]} {
@@ -25,7 +42,7 @@ proc mlat_is_configured {} {
 	}
 
 	# check for existence of fa-mlat-client
-	if {[auto_execok fa-mlat-client] eq ""} {
+	if {[find_mlat_client] eq ""} {
 		logger "multilateration support disabled (no fa-mlat-client found)"
 		return 0
 	}
@@ -35,7 +52,7 @@ proc mlat_is_configured {} {
 	return 1
 }
 
-proc enable_mlat {} {
+proc enable_mlat {udp_transport} {
 	if {![mlat_is_configured]} {
 		return
 	}
@@ -47,6 +64,7 @@ proc enable_mlat {} {
 
 	logger "multilateration data requested, enabling mlat client"
 	set ::mlatEnabled 1
+	set ::mlatUdpTransport $udp_transport
 	start_mlat_client
 }
 
@@ -80,7 +98,10 @@ proc close_mlat_client {} {
 }
 
 proc start_mlat_client {} {
-	unset -nocomplain ::mlatRestartTimer
+	if {[info exists ::mlatRestartTimer]} {
+		after cancel $::mlatRestartTimer
+		unset ::mlatRestartTimer
+	}
 
 	if {!$::mlatEnabled} {
 		return
@@ -98,18 +119,61 @@ proc start_mlat_client {} {
 		return
 	}
 
-	if {[catch {set ::mlatPipe [open "|fa-mlat-client --input-host localhost --input-port 30005 2>@stderr" r+]} catchResult] == 1} {
+	set command [find_mlat_client]
+	lappend command "--input-host" "localhost" "--input-port" "30005"
+	if {$::mlatUdpTransport ne ""} {
+		lassign $::mlatUdpTransport udp_host udp_port udp_key
+		lappend command "--udp-transport" "$udp_host:$udp_port:$udp_key"
+	}
+
+	logger "Starting multilateration client: $command"
+
+	pipe rpipe wpipe
+	lappend command "2>@$wpipe"
+	if {[catch {set ::mlatPipe [open |$command r+]} catchResult] == 1} {
 		logger "got '$catchResult' starting multilateration client"
 		schedule_mlat_client_restart
+		catch {close $rpipe}
+		catch {close $wpipe}
 		return
 	}
+
+	close $wpipe
+	fconfigure $rpipe -buffering line -blocking 0
+	fileevent $rpipe readable [list forward_to_logger [pid $::mlatPipe] $rpipe]
 
 	set ::mlatReady 0
 	fconfigure $::mlatPipe -buffering line -blocking 0 -translation binary
 	fileevent $::mlatPipe readable mlat_data_available
 }
 
+proc forward_to_logger {childpid pipe} {
+	while 1 {
+		if {[catch {set size [gets $pipe line]}] == 1} {
+			catch {close $pipe}
+			reap_any_dead_children
+			return
+		}
+
+		if {$size < 0} {
+			break
+		}
+
+		if {$line ne ""} {
+			logger "mlat($childpid): $line"
+		}
+	}
+
+	if {[eof $pipe]} {
+		catch {close $pipe}
+		reap_any_dead_children
+	}
+}
+
 proc schedule_mlat_client_restart {} {
+	if [info exists ::mlatRestartTimer] {
+		after cancel $::mlatRestartTimer
+	}
 	set ::mlatRestartTimer [after $::mlatRestartMillis start_mlat_client]
 }
 
@@ -124,7 +188,11 @@ proc forward_to_mlat_client {_row} {
 	# handle messages intended for piaware
 	switch -exact $row(type) {
 		"mlat_enable" {
-			enable_mlat
+			if {[info exists row(udp_transport)]} {
+				enable_mlat $row(udp_transport)
+			} else {
+				enable_mlat {}
+			}
 			return
 		}
 

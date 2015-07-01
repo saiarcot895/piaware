@@ -28,6 +28,7 @@ namespace eval ::fa_adept {
 	protected variable aliveTimerID
 	protected variable nextHostIndex 0
 	protected variable lastCompressClock 0
+	protected variable flushPending 0
 
     constructor {args} {
 		configure {*}$args
@@ -133,13 +134,17 @@ namespace eval ::fa_adept {
 		#logger "TLS local status: [::tls::status -local $sock]"
 		log_locally "encrypted session established with FlightAware"
 
-		# configure the socket nonblocking line-buffered and
+		# configure the socket nonblocking full-buffered and
 		# schedule this object's server_data_available method
 		# to be invoked when data is available on the socket
+		# we arrange to call flush periodically while output is pending,
+		# to get better batching of data while still getting it out
+		# promptly
 
-		fconfigure $sock -buffering line -blocking 0 -translation binary
+		fconfigure $sock -buffering full -buffersize 4096 -blocking 0 -translation binary
 		fileevent $sock readable [list $this server_data_available]
 		set connected 1
+		set flushPending 0
 
 		# ok, we're connected, now attempt to login
 		# note that login reply will be asynchronous to us, i.e.
@@ -358,6 +363,40 @@ namespace eval ::fa_adept {
 			if {[info exists row(user)]} {
 				set ::flightaware_user $row(user)
 			}
+
+			# if we recieved lat/lon data, we should save it in /etc/latlon
+			if {[info exists row(recv_lat)] && [info exists row(recv_lon)]} {
+	
+				set latlon "$row(recv_lat)\n$row(recv_lon)"
+				set f "/var/lib/dump1090/latlon"
+				file mkdir "/var/lib/dump1090"
+
+				# if the file exists, we need to make sure that it has good data
+				# then we will check to see if it's old data
+				# if the data is old, we write new data. If the data is bad, we write new data
+
+				if {[file exists $f]} {
+					set fp [open $f r]
+					set data [read $fp]
+					close $fp
+					# if not exactly two lines, bad data. If not equal to input, old data. Delete the file.
+					if { ([llength [split $data "\n"]] != 2) || [string compare $latlon $data] } {
+						file delete $f
+					}
+				}
+
+				# if the file doesn't exist, create it
+				if {![file exists $f]} {
+					set fp [open $f w]
+					puts -nonewline $fp $latlon
+					close $fp
+					log_locally  "updated location... will reboot dump1090"
+					attempt_dump1090_restart
+					} else { 
+					log_locally "did not update location" 
+				}
+			}
+
 
 			log_locally "logged in to FlightAware as user $::flightaware_user"
 			cancel_connect_timer
@@ -650,12 +689,8 @@ namespace eval ::fa_adept {
 		set message(type) login
 
 		# construct some key-value pairs to be included.
-		#
-		# note that there are two possible sources for piaware_version_full.
-		# the last one found will be used.
-		#
-		foreach var "user password piaware_version piaware_version image_type piaware_version_full piaware_version_full" globalVar "::flightaware_user ::flightaware_password ::piawareVersion ::shortVersionID ::imageType ::piawareVersionFull ::fullVersionID" {
-			if {[info exists $globalVar]} {
+		foreach var "user password image_type piaware_version piaware_version_full piaware_package_version" globalVar "::flightaware_user ::flightaware_password ::imageType ::piawareVersion ::piawareVersionFull ::piawarePackageVersion" {
+			if {[info exists $globalVar] && [set $globalVar] ne ""} {
 				set message($var) [set $globalVar]
 			}
 		}
@@ -796,7 +831,7 @@ namespace eval ::fa_adept {
 	#  disconnects and schedules reconnection shortly in the future
     #
     method send {text} {
-		if {![info exists sock]} {
+		if {![is_connected]} {
 			# we might be halfway through a reconnection.
 			# drop data on the floor
 			return
@@ -809,8 +844,26 @@ namespace eval ::fa_adept {
 		if {[catch {puts $sock $text} catchResult] == 1} {
 			log_locally "got '$catchResult' writing to FlightAware socket, reconnecting..."
 			close_socket_and_reopen
+			return
+		}
+
+		if {!$flushPending} {
+			set flushPending 1
+			after 200 [list $this flush_output]
 		}
     }
+
+	# flush any buffered output
+	method flush_output {} {
+		set flushPending 0
+		if {[info exists sock]} {
+			if {[catch {flush $sock} catchResult] == 1} {
+				log_locally "got '$catchResult' writing to FlightAware socket, reconnecting..."
+				close_socket_and_reopen
+				return
+			}
+		}
+	}
 
 	#
 	# send_array - send an array as a message
