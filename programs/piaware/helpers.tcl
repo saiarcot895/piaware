@@ -13,9 +13,7 @@ package require tls
 proc logger {text} {
 	#::bsd::syslog log info $text
 	log_locally $text
-        if {[may_send_log_messages]} {
-            adept send_log_message $text
-        }
+	adept send_log_message $text
 }
 
 #
@@ -74,6 +72,8 @@ proc load_adept_config_and_setup {} {
 	if {[info exists ::adeptConfig(password)]} {
 		set ::flightaware_password $::adeptConfig(password)
 	}
+
+	lassign [load_location_info] ::receiverLat ::receiverLon
 
 	return 1
 }
@@ -176,41 +176,46 @@ proc cleanup_and_exit {} {
 }
 
 #
-# may_send_health_messages: return true if we are permitted to send system
-# information in health messages
+# load lat/lon info from /var/lib if available
 #
-proc may_send_health_messages {} {
-    if {![info exists ::adeptConfig(sendHealthInfo)]} {
-        return 1
-    }
+proc load_location_info {} {
+	if {[catch {set ll [try_load_location_info]}] == 1} {
+		return [list "" ""]
+	}
 
-    if {![string is boolean $::adeptConfig(sendHealthInfo)]} {
-        return 0
-    }
-
-    return $::adeptConfig(sendHealthInfo)
+	return $ll
 }
 
-#
-# may_send_log_messages: return true if we are permitted to send log
-# messages to FA
-#
-proc may_send_log_messages {} {
-    if {[llength [info commands "adept"]] < 1} {
-        # adept client has not yet loaded
-        return 0
-    }
+proc try_load_location_info {} {
+	set fp [open $::locationFile r]
+	set data [read $fp]
+	close $fp
 
-    if {![info exists ::adeptConfig(sendLogMessages)]} {
-        return 1
-    }
+	lassign [split $data "\n"] lat lon
+	if {![string is double $lat] || ![string is double $lon]} {
+		error "lat/lon missing or not numeric"
+	}
 
-    if {![string is boolean $::adeptConfig(sendLogMessages)]} {
-        return 0
-    }
-
-    return $::adeptConfig(sendLogMessages)
+	return [list $lat $lon]
 }
 
+# save location info
+proc save_location_info {lat lon} {
+	if {[catch {try_save_location_info $lat $lon} catchResult] == 1} {
+		log_locally "got '$catchResult' trying to update $::locationFile"
+	}
+}
+
+proc try_save_location_info {lat lon} {
+	set dir [file dirname $::locationFile]
+	if {![file exists $dir]} {
+		file mkdir $dir
+	}
+
+	set fp [open $::locationFile w]
+	puts $fp $lat
+	puts $fp $lon
+	close $fp
+}
 
 # vim: set ts=4 sw=4 sts=4 noet :

@@ -335,6 +335,10 @@ namespace eval ::fa_adept {
 				forward_to_mlat_client row
 			}
 
+			"update_location" {
+				handle_update_location row
+			}
+
 			default {
 				log_locally "unrecognized message type '$row(type)' from server, ignoring..."
 				incr ::nUnrecognizedServerMessages
@@ -364,39 +368,10 @@ namespace eval ::fa_adept {
 				set ::flightaware_user $row(user)
 			}
 
-			# if we recieved lat/lon data, we should save it in /etc/latlon
+			# if we received lat/lon data, handle it
 			if {[info exists row(recv_lat)] && [info exists row(recv_lon)]} {
-	
-				set latlon "$row(recv_lat)\n$row(recv_lon)"
-				set f "/var/lib/dump1090/latlon"
-				file mkdir "/var/lib/dump1090"
-
-				# if the file exists, we need to make sure that it has good data
-				# then we will check to see if it's old data
-				# if the data is old, we write new data. If the data is bad, we write new data
-
-				if {[file exists $f]} {
-					set fp [open $f r]
-					set data [read $fp]
-					close $fp
-					# if not exactly two lines, bad data. If not equal to input, old data. Delete the file.
-					if { ([llength [split $data "\n"]] != 2) || [string compare $latlon $data] } {
-						file delete $f
-					}
-				}
-
-				# if the file doesn't exist, create it
-				if {![file exists $f]} {
-					set fp [open $f w]
-					puts -nonewline $fp $latlon
-					close $fp
-					log_locally  "updated location... will reboot dump1090"
-					attempt_dump1090_restart
-					} else { 
-					log_locally "did not update location" 
-				}
+				update_location $row(recv_lat) $row(recv_lon)
 			}
-
 
 			log_locally "logged in to FlightAware as user $::flightaware_user"
 			cancel_connect_timer
@@ -410,6 +385,14 @@ namespace eval ::fa_adept {
 			log_locally "You can start it up again using 'sudo /etc/init.d/piaware start'"
 			exit 4
 		}
+	}
+
+	#
+	# handle_update_location - handle a location-update notification from the server
+	#
+	method handle_update_location {_row} {
+		upvar $_row row
+		update_location $row(recv_lat) $row(recv_lon)
 	}
 
 	#
@@ -701,9 +684,7 @@ namespace eval ::fa_adept {
 			set message(adsbprogram) $::netstatus(program_30005)
 		}
 
-		if {[info exists ::netstatus(program_10001)]} {
-			set message(transprogram) $::netstatus(program_10001)
-		}
+		set message(transprogram) "faup1090"
 
 		set message(mac) [get_mac_address_or_quit]
 
@@ -716,7 +697,7 @@ namespace eval ::fa_adept {
 		set message(local_manual_update_enable) [update_check manualUpdate]
 		set message(local_mlat_enable) [mlat_is_configured]
 
-		set message(compression_version) 1.1
+		set message(compression_version) 1.2
 
 		send_array message
 	}
@@ -871,7 +852,14 @@ namespace eval ::fa_adept {
 	method send_array {_row} {
 		upvar $_row row
 
-		set row(clock) [clock seconds]
+		if {[info exists row(clock)]} {
+			set now [clock seconds]
+			if {abs($now - $row(clock)) > 1} {
+				set row(sent_at) $now
+			}
+		} else {
+			set row(clock) [clock seconds]
+		}
 
 		if {$loggedIn} {
 			compress_array row
@@ -905,7 +893,7 @@ namespace eval ::fa_adept {
 			}
 		}
 
-		foreach "var keyChar format" "clock c I hexid h H6 ident i A8 alt a I lat l R lon m R speed s S squawk q H4 heading H S" {
+		foreach "var keyChar format" "clock c I sent_at C I hexid h H6 ident i A8 alt a I lat l R lon m R speed s S squawk q H4 heading H S" {
 			if {[info exists row($var)]} {
 				append newKey $keyChar
 				append binData [binary format $format $row($var)]

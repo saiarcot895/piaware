@@ -103,29 +103,13 @@ if 0 {
 	load_adept_config_and_setup
 	#confirm_nonblank_user_and_password_or_die
 
-        if {[may_send_health_messages]} {
-            log_locally "piaware will include system information in periodic health messages."
-        } else {
-            log_locally "piaware will NOT include system information in periodic health messages."
-        }
-
-        if {[may_send_log_messages]} {
-            log_locally "piaware will forward log messages to FlightAware."
-        } else {
-            log_locally "piaware will NOT forward log messages to FlightAware."
-        }
-
 	adept connect
 
-	inspect_sockets_with_netstat
-
-    setup_fa_style_adsb_client
+    connect_adsb_via_faup1090
 
 	periodically_check_adsb_traffic
 
-        # NB: if !may_send_health_messages, this will still periodically send an empty health message
-        # containing only the clock to keep the adept server happy
-        after 30000 periodically_send_health_information
+    after 30000 periodically_send_health_information
 
     catch {vwait die}
 

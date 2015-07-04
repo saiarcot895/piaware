@@ -1,3 +1,4 @@
+# -*- mode: tcl; tab-width: 4; indent-tabs-mode: t -*-
 #
 # piaware package - Copyright (C) 2014 FlightAware LLC
 #
@@ -227,11 +228,7 @@ proc process_netstat_socket_line {line} {
 
 		"piaware" {
 			set ::running(piaware) 1
-			if {$foreignAddrPort == "10001" && $state == "ESTABLISHED"} {
-				set ::netstatus(piaware_10001) 1
-			}
-
-			if {$foreignAddrPort == "1200" && $state == "ESTABLISHED"} {
+			if {[string match "*:1200" $foreignAddress] && $state == "ESTABLISHED"} {
 				set ::netstatus(piaware_1200) 1
 			}
 		}
@@ -246,9 +243,7 @@ proc inspect_sockets_with_netstat {} {
     set ::running(faup1090) 0
     set ::running(piaware) 0
     set ::netstatus(status_30005) 0
-    set ::netstatus(status_10001) 0
     set ::netstatus(faup1090_30005) 0
-    set ::netstatus(piaware_10001) 0
     set ::netstatus(piaware_1200) 0
 
     set fp [open "|netstat --program --tcp --wide --all --numeric 2>/dev/null"]
@@ -281,23 +276,13 @@ proc subst_is_or_is_not {string value} {
 proc netstat_report {} {
     inspect_sockets_with_netstat
 
-    foreach port "30005 10001" {
-		set statusvar "status_$port"
-		set programvar "program_$port"
+	if {!$::netstatus(status_30005)} {
+		puts "no program appears to be listening for connections on port $port."
+	} else {
+		puts "$::netstatus(program_30005) is listening for connections on port $port."
+	}
 
-		if {!$::netstatus($statusvar)} {
-			puts "no program appears to be listening for connections on port $port."
-		} else {
-			puts "$::netstatus($programvar) is listening for connections on port $port."
-		}
-    }
-
-    if {$::netstatus(faup1090_30005)} {
-		puts "faup1090 is connected to port 30005"
-    }
-
-    puts "[subst_is_or_is_not "piaware %s connected to port 10001." $::netstatus(piaware_10001)]"
-
+    puts "[subst_is_or_is_not "faup1090 %s connected to port 30005." $::netstatus(faup1090_30005)]"
     puts "[subst_is_or_is_not "piaware %s connected to FlightAware." $::netstatus(piaware_1200)]"
 }
 
@@ -328,9 +313,6 @@ proc reap_any_dead_children {} {
 				switch $code {
 					default {
 						logger "the system told us that process $pid exited due to some general error"
-					}
-					98 {
-						logger "the system confirmed that process $pid exited.  the exit status of $code tells us that faup1090 couldn't open the listening port because something else already has it open"
 					}
 
 					0 {
@@ -643,11 +625,16 @@ proc upgrade_dump1090 {} {
 # program, so it's a bit tricky
 #
 proc restart_piaware {} {
-    logger "restarting piaware. hopefully i'll be right back..."
+	logger "restarting piaware. hopefully i'll be right back..."
     exec_hook_script_in_background "restart_piaware"
-    sleep 10
-    logger "piaware failed to die, pid [pid], that's me, i'm gonna kill myself"
-    exit 0
+
+	# sleep apparently restarts on signals, we want to process them,
+	# so use after/vwait so the event loop runs.
+	after 10000 [list set ::die 1]
+	vwait ::die
+
+	logger "piaware failed to die, pid [pid], that's me, i'm gonna kill myself"
+	exit 0
 }
 
 #
